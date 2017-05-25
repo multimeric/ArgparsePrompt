@@ -15,7 +15,7 @@ class TestParser(unittest.TestCase):
         Runs the python file with the current python interpreter, with the given stdin
         :param path: Path to the python file, relative to the test/ directory
         :param stdin: The stdin to pipe into the python process
-        :returns The return code from the child process
+        :returns A tuple containing the return code from the child process, and stdout as a byte string
         """
         proc = subprocess.Popen(
             [self.python, self.base / path],
@@ -23,14 +23,30 @@ class TestParser(unittest.TestCase):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        proc.communicate(stdin.encode())
-        return proc.poll()
+        stdout, stderr = proc.communicate(stdin.encode())
+        exitcode = proc.poll()
+        return exitcode, stdout.decode().strip(), stderr.decode().strip()
 
-    def test_parser(self):
+    def test_basic_parser(self):
         """Test a basic parser with no type argument"""
-        self.assertEqual(self.run_script('parser.py', stdin='abc'), 0)
+        exitcode, stdout, stderr = self.run_script('default_parser.py', stdin='abc')
+        self.assertEqual(exitcode, 0)
+        self.assertEqual(stdout, 'abc')
 
-    def test_type_parser(self):
-        """Test a parser with a type argument. Check that it fails when it should and succeeds when it should"""
-        self.assertNotEqual(self.run_script('typed_parser.py', stdin='abc'), 0)
-        self.assertEqual(self.run_script('typed_parser.py', stdin='123'), 0)
+    def test_default_parser(self):
+        """Test a basic parser with a default value"""
+        exitcode, stdout, stderr = self.run_script('default_parser.py', stdin='\n')
+        self.assertEqual(exitcode, 0)
+        self.assertEqual(stdout, 'foo')
+
+    def test_invalid_type(self):
+        """Test a parser with a type argument. Check that it fails when the type is wrong"""
+        exitcode, stdout, stderr = self.run_script('typed_parser.py', stdin='abc')
+        self.assertNotEqual(exitcode, 0)
+
+    def test_valid_type(self):
+        """Test a parser with a type argument. Check that it succeeds when the type is correct"""
+        stdin = '123'
+        exitcode, stdout, stderr = self.run_script('typed_parser.py', stdin=stdin)
+        self.assertEqual(exitcode, 0)
+        self.assertEqual(stdout, stdin)

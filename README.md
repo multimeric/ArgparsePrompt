@@ -15,42 +15,58 @@ use ArgumentParser, except that, if any argument does not have a specified `defa
 for it on the commandline, the `PromptParser` will prompt for a value for this argument using `input()`, which is read 
 from stdin.
 
-Consider the code below:
+Consider the code below (taken from one of the unit tests):
 
 ```python
 from argparse_prompt import PromptParser
 
 parser = PromptParser()
-parser.add_argument('--arg', '-a')
-print(parser.parse_args())
+parser.add_argument('--argument', '-a', help='An argument you could provide', default='foo')
+print(parser.parse_args().argument)
 ```
 
-If you run this script with a value for `arg`, the parsing will run as normal:
+If you run this script with a value for `argument`, the parsing will run as normal:
 ```
-$ python test.py --arg 12
-Namespace(something='12')
+$ python test/default_parser.py --argument 12
+12
 ```
 
 However if you don't specify a value for `arg`, the parser will prompt you for one
 ```
-$ python test.py
-(something) 12
-Namespace(arg='12')
+$ python test/default_parser.py
+argument: An argument you could provide
+> (foo) car
+car
 ```
 
-If you provide a `type` argument, this type checking will be applied to the prompted value as well:
+Since this argument has a default value, you can also just hit enter and this value will be used automatically:
 ```
+python test/default_parser.py
+argument: An argument you could provide
+> (foo) 
+foo
+```
+
+You can also specify a type for the argument in the normal way:
+
+```python
+from argparse_prompt import PromptParser
+
 parser = PromptParser()
-parser.add_argument('--arg', '-a', type=int)
-print(parser.parse_args())
+parser.add_argument('--argument', '-a', help='An argument you could provide', default='foo')
+print(parser.parse_args().argument)
 ```
+
+If you do, this type checking will be used for the value you enter at the prompt:
 ```
-$ python test.py
-(something) abc
-usage: typed_parser.py [-h] [--something SOMETHING]
-typed_parser.py: error: argument --arg/-a: invalid <argparse_prompt.Prompt object at 0x7fa0b5f5eeb8> value: ''
-$ python test.py
-(something) 12
-Namespace(arg='12')
+$ python test/typed_parser.py  
+argument: An argument you could provide
+abc
+Argument "argument" was given a value not of type <class 'int'>
 ```
+
+Finally, if you use the `prompt` argument to `add_argument`, parsing will be disabled:
+
+```python
+parser.add_argument('--argument', '-a', help='An argument you could provide', default='foo', prompt=False)
 ```
