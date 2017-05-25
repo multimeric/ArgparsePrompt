@@ -1,5 +1,5 @@
 import argparse
-
+import os
 import sys
 
 
@@ -15,7 +15,7 @@ class PromptParser(argparse.ArgumentParser):
         :param kwargs:
         :return:
         """
-        if prompt and kwargs.get('action') != 'help':
+        if prompt and kwargs.get('action') != 'help' and not os.getenv('ARGPARSE_PROMPT_AUTO'):
             # Wrap the Prompt type around the type the user wants
             type = Prompt(help=kwargs.get('help'), type=kwargs.get('type'), default=kwargs.get('default'))
 

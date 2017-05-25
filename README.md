@@ -9,6 +9,7 @@ pip install git+https://github.com/MelbourneGenomics/ArgparsePrompt
 
 # Usage
 
+## Basic Usage
 The only public interface of this module is the `PromptParser` class, which is a subclass of Python's 
 [ArgumentParser](https://docs.python.org/3/library/argparse.html). Use this class in exactly the same way that you would
 use ArgumentParser, except that, if any argument does not have a specified `default` value, and a value is not provided
@@ -39,6 +40,7 @@ argument: An argument you could provide
 car
 ```
 
+## Default Values
 Since this argument has a default value, you can also just hit enter and this value will be used automatically:
 ```
 python test/default_parser.py
@@ -47,6 +49,7 @@ argument: An argument you could provide
 foo
 ```
 
+## Type Checking
 You can also specify a type for the argument in the normal way:
 
 ```python
@@ -65,8 +68,15 @@ abc
 Argument "argument" was given a value not of type <class 'int'>
 ```
 
-Finally, if you use the `prompt` argument to `add_argument`, parsing will be disabled:
+## Situationally Disabling the Prompt
+If you use the `prompt` argument to `add_argument`, parsing will be disabled:
 
 ```python
 parser.add_argument('--argument', '-a', help='An argument you could provide', default='foo', prompt=False)
+```
+
+Also, if you want to disable all prompting (for an automated script, for example), just set the `ARGPARSE_PROMPT_AUTO` to
+a truthy value:
+```bash
+ARGPARSE_PROMPT_AUTO=1 python test/default_parser.py
 ```
