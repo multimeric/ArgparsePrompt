@@ -60,3 +60,9 @@ class TestParser(unittest.TestCase):
         exitcode, stdout, stderr = self.run_script('typed_parser.py', stdin=stdin)
         self.assertEqual(exitcode, 0)
         self.assertEqual(stdout, stdin)
+
+    def test_secure_parser(self):
+        """Test a secure parser, which shouldn't echo the user's input to stdout"""
+        exitcode, stdout, stderr = self.run_script('secure_parser.py', stdin='abc')
+        self.assertEqual(exitcode, 0)
+        self.assertEqual(stdout, 'abc')

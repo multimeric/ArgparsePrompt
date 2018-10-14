@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from argparse_prompt import PromptParser
 
 parser = PromptParser()
