@@ -9,7 +9,7 @@ except(IOError, ImportError):
 setup(
     name="argparse_prompt",
     long_description=long_description,
-    version="0.0.2",
+    version="0.0.3",
     py_modules=['argparse_prompt'],
     test_suite="test",
     license="GPL",
@@ -17,5 +17,13 @@ setup(
     author_email="michael.r.milton@gmail.com",
     description="Wrapper for the built-in Argparse, allowing missing command-line arguments to be filled in by the user via interactive prompts",
     keywords="argparse prompt interactive argument",
-    url="https://github.com/MelbourneGenomics/ArgparsePrompt"
+    url="https://github.com/MelbourneGenomics/ArgparsePrompt",
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Operating System :: OS Independent',
+        'Topic :: Software Development :: User Interfaces',
+        'Programming Language :: Python :: 3 :: Only'
+    ]
 )
