@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from setuptools import setup
 
 try:
@@ -9,7 +10,7 @@ except(IOError, ImportError):
 setup(
     name="argparse_prompt",
     long_description=long_description,
-    version="0.0.3",
+    version="0.0.4",
     py_modules=['argparse_prompt'],
     test_suite="test",
     license="GPL",
@@ -25,5 +26,6 @@ setup(
         'Operating System :: OS Independent',
         'Topic :: Software Development :: User Interfaces',
         'Programming Language :: Python :: 3 :: Only'
-    ]
+    ],
+    long_description_content_type='text/markdown'
 )

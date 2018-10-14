@@ -1,10 +1,11 @@
 # ArgparsePrompt
-Wrapper for the built-in Argparse, allowing missing command-line arguments to be filled in by the user via interactive prompts
+ArgparsePrompt is a wrapper for the built-in Argparse, allowing missing command-line arguments to be filled in by the
+user via interactive prompts
 
 # Installation
-ArgparsePrompt has not yet been published to PYPI, but in the meantime, you can install it using pip+git:
+ArgparsePrompt can be installed using pip:
 ```bash
-pip install git+https://github.com/MelbourneGenomics/ArgparsePrompt
+pip install argparse_prompt
 ```
 
 # Usage
@@ -67,6 +68,17 @@ argument: An argument you could provide
 abc
 Argument "argument" was given a value not of type <class 'int'>
 ```
+
+## Secure Values
+For arguments that need to be secure, such as passwords, secret keys etc, you can use `secure=True` when defining your
+argument. This will cause whatever the user inputs for that field to be hidden from the terminal, in the same way that 
+`git`, or `ssh` hides the password input.
+
+For example:
+```python
+parser.add_argument('--password', '-p', help='A very secret password', secure=True)
+```
+
 
 ## Situationally Disabling the Prompt
 If you use the `prompt` argument to `add_argument`, parsing will be disabled:
