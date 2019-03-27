@@ -63,9 +63,10 @@ class Prompt:
         try:
             # If the user provided no value for this argument, prompt them for it
             if val == '':
-                print('{}{}\n> {}'.format(self.name, help_str, default_str), end='', file=sys.stderr)
+                prompt = '{}{}\n> {}'.format(self.name, help_str, default_str)
 
-                newval = getpass.getpass(prompt='') if self.secure else input()
+                newval = getpass.getpass(prompt=prompt) \
+                    if self.secure else input(prompt)
 
                 # If they just hit enter, they want the default value
                 if newval == '':
