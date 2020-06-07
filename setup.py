@@ -10,7 +10,7 @@ except(IOError, ImportError):
 setup(
     name="argparse_prompt",
     long_description=long_description,
-    version="0.0.4",
+    version="0.0.5",
     py_modules=['argparse_prompt'],
     test_suite="test",
     license="GPL",
