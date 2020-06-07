@@ -69,7 +69,12 @@ class Prompt:
 
                 # If they just hit enter, they want the default value
                 if newval == '':
-                    return self.type(self.default)
+                    # According to the argparse docs, if the default is a string we should convert it, but otherwise
+                    # we return it verbatim: https://docs.python.org/3/library/argparse.html#default
+                    if isinstance(self.default, str):
+                        return self.type(self.default)
+                    else:
+                        return self.default
                 else:
                     return self.type(newval)
 

@@ -3,6 +3,16 @@ import unittest
 import subprocess
 from pathlib import Path
 import sys
+from argparse_prompt import PromptParser
+from contextlib import contextmanager
+from io import StringIO
+
+@contextmanager
+def redirect_stdin(content):
+    string_io = StringIO(content + '\n')
+    sys.stdin = string_io
+    yield
+    sys.stdin = sys.__stdin__
 
 
 class TestParser(unittest.TestCase):
@@ -66,3 +76,11 @@ class TestParser(unittest.TestCase):
         exitcode, stdout, stderr = self.run_script('secure_parser.py', stdin='abc')
         self.assertEqual(exitcode, 0)
         self.assertEqual(stdout, 'abc')
+
+    def test_mismatched_default(self):
+        """Test a parser which has a default which isn't the same type as the type"""
+        with redirect_stdin(''):
+            parser = PromptParser()
+            parser.add_argument('--argument', type=str, default=None)
+            args = parser.parse_args([])
+            self.assertEqual(args.argument, None)
