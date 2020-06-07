@@ -1,86 +1,76 @@
 import os
-import unittest
-import subprocess
-from pathlib import Path
-import sys
+from unittest import TestCase, mock
+from unittest.mock import patch
+
 from argparse_prompt import PromptParser
-from contextlib import contextmanager
-from io import StringIO
-
-@contextmanager
-def redirect_stdin(content):
-    string_io = StringIO(content + '\n')
-    sys.stdin = string_io
-    yield
-    sys.stdin = sys.__stdin__
 
 
-class TestParser(unittest.TestCase):
-    base = Path('test').resolve()
-
-    def setUp(self):
-        self.python = sys.executable
-
-    def run_script(self, path: str, stdin: str = '', popen_args:dict = {}):
-        """
-        Runs the python file with the current python interpreter, with the given stdin
-        :param path: Path to the python file, relative to the test/ directory
-        :param stdin: The stdin to pipe into the python process
-        :returns A tuple containing the return code from the child process, and stdout as a byte string
-        """
-        proc = subprocess.Popen(
-            [self.python, self.base / path],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            **popen_args
-        )
-        stdout, stderr = proc.communicate(stdin.encode())
-        exitcode = proc.poll()
-        return exitcode, stdout.decode().strip(), stderr.decode().strip()
-
-    def test_basic_parser(self):
+class TestParser(TestCase):
+    @mock.patch('builtins.input')
+    def test_basic_parser(self, input_mock):
         """Test a basic parser with no type argument"""
-        exitcode, stdout, stderr = self.run_script('default_parser.py', stdin='abc')
-        self.assertEqual(exitcode, 0)
-        self.assertEqual(stdout, 'abc')
+        input_mock.return_value = 'abc'
+        parser = PromptParser()
+        parser.add_argument('--argument', '-a', help='An argument you could provide', default='foo')
+        args = parser.parse_args([])
+        self.assertEqual(args.argument, 'abc')
 
-    def test_default_parser(self):
+    @mock.patch('builtins.input')
+    def test_default_parser(self, input_mock):
         """Test a basic parser with a default value"""
-        exitcode, stdout, stderr = self.run_script('default_parser.py', stdin='\n')
-        self.assertEqual(exitcode, 0)
-        self.assertEqual(stdout, 'foo')
+        input_mock.return_value = ''
+        parser = PromptParser()
+        parser.add_argument('--argument', '-a', help='An argument you could provide', default='foo')
+        args = parser.parse_args([])
+        self.assertEqual(args.argument, 'foo')
 
+    @patch.dict(os.environ,{'ARGPARSE_PROMPT_AUTO':'True'})
     def test_auto_parser(self):
         """Test a basic parser when the enviroment variable is set to disable prompts"""
-        newenv = os.environ.copy()
-        newenv['ARGPARSE_PROMPT_AUTO'] = 'True'
-        exitcode, stdout, stderr = self.run_script('default_parser.py', popen_args=dict(env=newenv))
-        self.assertEqual(exitcode, 0)
-        self.assertEqual(stdout, 'foo')
+        parser = PromptParser()
+        parser.add_argument('--argument', '-a', help='An argument you could provide', default='foo')
+        args = parser.parse_args([])
+        self.assertEqual(args.argument, 'foo')
 
-    def test_invalid_type(self):
+    @mock.patch('builtins.input')
+    def test_invalid_type(self, input_mock):
         """Test a parser with a type argument. Check that it fails when the type is wrong"""
-        exitcode, stdout, stderr = self.run_script('typed_parser.py', stdin='abc')
-        self.assertNotEqual(exitcode, 0)
-
-    def test_valid_type(self):
-        """Test a parser with a type argument. Check that it succeeds when the type is correct"""
-        stdin = '123'
-        exitcode, stdout, stderr = self.run_script('typed_parser.py', stdin=stdin)
-        self.assertEqual(exitcode, 0)
-        self.assertEqual(stdout, stdin)
-
-    def test_secure_parser(self):
-        """Test a secure parser, which shouldn't echo the user's input to stdout"""
-        exitcode, stdout, stderr = self.run_script('secure_parser.py', stdin='abc')
-        self.assertEqual(exitcode, 0)
-        self.assertEqual(stdout, 'abc')
-
-    def test_mismatched_default(self):
-        """Test a parser which has a default which isn't the same type as the type"""
-        with redirect_stdin(''):
+        input_mock.return_value = 'abc'
+        with self.assertRaises(SystemExit):
             parser = PromptParser()
-            parser.add_argument('--argument', type=str, default=None)
+            parser.add_argument('--argument', '-a', help='An argument you could provide',
+                                type=int)
             args = parser.parse_args([])
-            self.assertEqual(args.argument, None)
+        input_mock.assert_called()
+
+    @mock.patch('builtins.input')
+    def test_valid_type(self, input_mock):
+        """Test a parser with a type argument. Check that it succeeds when the type is correct"""
+        input_mock.return_value = '123'
+        parser = PromptParser()
+        parser.add_argument('--argument', '-a', help='An argument you could provide',
+                            type=int)
+        args = parser.parse_args([])
+        self.assertEqual(args.argument, 123)
+        input_mock.assert_called()
+
+    @mock.patch('getpass.getpass')
+    def test_secure_parser(self, getpass_mock):
+        """Test a secure parser, which shouldn't echo the user's input to stdout"""
+        getpass_mock.return_value = 'abc'
+        parser = PromptParser()
+        parser.add_argument('--argument', '-a', help='An argument you could provide', secure=True, default='foo')
+        args = parser.parse_args([])
+        self.assertEqual(args.argument, 'abc')
+        getpass_mock.assert_called()
+
+
+    @mock.patch('builtins.input')
+    def test_mismatched_default(self, input_mock):
+        """Test a parser which has a default which isn't the same type as the type"""
+        input_mock.return_value = ''
+        parser = PromptParser()
+        parser.add_argument('--argument', type=str, default=None)
+        args = parser.parse_args([])
+        self.assertEqual(args.argument, None)
+        input_mock.assert_called()
