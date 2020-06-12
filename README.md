@@ -8,6 +8,8 @@ ArgparsePrompt can be installed using pip:
 pip install argparse_prompt
 ```
 
+Note that ArgparsePrompt is only compatible with Python 3.6 and higher, and does not support Python 2.X
+
 # Usage
 
 ## Basic Usage
