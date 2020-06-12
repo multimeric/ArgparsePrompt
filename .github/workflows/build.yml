@@ -25,5 +25,7 @@ jobs:
           pip install pytest
           pip install -e .
 
+      - uses: pre-commit/action@v1.0.1
+
       - name: Test
         run: pytest test.py

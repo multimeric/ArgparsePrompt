@@ -16,18 +16,27 @@ class PromptParser(argparse.ArgumentParser):
         :param secure: True if this argument contains sensitive information, and the input should not be shown on the
             command line while it's input.
         """
-        if prompt and kwargs.get('action') != 'help' and not os.getenv('ARGPARSE_PROMPT_AUTO'):
+        if (
+            prompt
+            and kwargs.get("action") != "help"
+            and not os.getenv("ARGPARSE_PROMPT_AUTO")
+        ):
             # Wrap the Prompt type around the type the user wants
-            type = Prompt(help=kwargs.get('help'), type=kwargs.get('type'), secure=secure, default=kwargs.get('default'))
+            type = Prompt(
+                help=kwargs.get("help"),
+                type=kwargs.get("type"),
+                secure=secure,
+                default=kwargs.get("default"),
+            )
 
             # Remove the old type so we can replace it with our own
-            if 'type' in kwargs:
-                del kwargs['type']
-            if 'default' in kwargs:
-                del kwargs['default']
+            if "type" in kwargs:
+                del kwargs["type"]
+            if "default" in kwargs:
+                del kwargs["default"]
 
             # Delegate to the parent class. Default must be '' in order to get the type function to be called
-            action = super().add_argument(*args, type=type, default='', **kwargs)
+            action = super().add_argument(*args, type=type, default="", **kwargs)
 
             # Set the argument name, now that the parser has parsed it
             type.name = action.dest
@@ -57,19 +66,20 @@ class Prompt:
         self.secure = secure
 
     def __call__(self, val):
-        default_str = '' if self.default is None else f'({self.default}) '
-        help_str = '' if self.help is None else f': {self.help}'
+        default_str = f"({self.default}) "
+        help_str = "" if self.help is None else f": {self.help}"
 
         try:
             # If the user provided no value for this argument, prompt them for it
-            if val == '':
-                prompt = '{}{}\n> {}'.format(self.name, help_str, default_str)
+            if val == "":
+                prompt = "{}{}\n> {}".format(self.name, help_str, default_str)
 
-                newval = getpass.getpass(prompt=prompt) \
-                    if self.secure else input(prompt)
+                newval = (
+                    getpass.getpass(prompt=prompt) if self.secure else input(prompt)
+                )
 
                 # If they just hit enter, they want the default value
-                if newval == '':
+                if newval == "":
                     newval = self.default
 
                 # According to the argparse docs, if the default is a string we should convert it, but otherwise
@@ -82,5 +92,8 @@ class Prompt:
             return self.type(val)
 
         except BaseException:
-            print(f'Argument "{self.name}" was given a value not of type {self.type}', file=sys.stderr)
+            print(
+                f'Argument "{self.name}" was given a value not of type {self.type}',
+                file=sys.stderr,
+            )
             exit(1)
