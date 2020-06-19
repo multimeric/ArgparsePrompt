@@ -12,7 +12,7 @@ setup(
     name="argparse_prompt",
     long_description=long_description,
     version="0.0.6",
-    python_requires='>=3.6',
+    python_requires=">=3.6",
     py_modules=["argparse_prompt"],
     license="GPL",
     author="Michael Milton",
